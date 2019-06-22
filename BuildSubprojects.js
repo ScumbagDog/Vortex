@@ -8,6 +8,7 @@ const minimist = require('minimist');
 const path = require('path');
 const rimraf = require('rimraf');
 const vm = require('vm');
+const os = require('os');
 
 const projectGroups = fs.readJSONSync('./BuildSubprojects.json');
 
@@ -35,6 +36,11 @@ class Unchanged extends Error {
 class ConditionNotMet extends Error {
   constructor() {
     super('Condition not met');
+  }
+}
+class OperatingSystemNotSupported extends Error {
+  constructor(project, OS) {
+    super('Platform '.concat(OS).concat(' not supported in plugin ').concat( project.name).concat(', skipping...'));
   }
 }
 class ProcessFeedback {
@@ -201,7 +207,18 @@ function evalCondition(condition, context) {
   return script.runInNewContext(context);
 }
 
+function isOSSupported(project, OS){
+  if(project.os.includes(OS)){
+    return true;
+  }
+  return false;
+}
+
 function processProject(project, buildType, feedback, noparallel) {
+  let userOS = os.platform();
+  if (!isOSSupported(project, userOS)){
+    return Promise.reject(new OperatingSystemNotSupported(project, userOS));
+  }
   if (!evalCondition(project.condition, { buildType })) {
     return Promise.reject(new ConditionNotMet());
   }
@@ -262,6 +279,8 @@ function main(args) {
             console.log('nothing to do', project.name);
           } else if (err instanceof ConditionNotMet) {
             console.log('condition wasn\'t met', project.name);
+          } else if (err instanceof OperatingSystemNotSupported) {
+            console.log(err.message);
           } else {
             console.error('failed ', project.name, err);
             failed = true;
