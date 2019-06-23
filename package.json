@@ -69,7 +69,7 @@
     "@babel/preset-env": "^7.4.4",
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-stage-0": "^7.0.0",
-    "@types/babel-core": "^6.25.6",
+    "@babel/core": "^7.0.0",
     "@types/babel-template": "^6.25.2",
     "@types/babel-traverse": "^6.25.5",
     "@types/babel-types": "^7.0.6",
