@@ -259,7 +259,7 @@
       "removeModules": ["vortex-api"],
       "sources": ["src/**/*.ts", "src/**/*.tsx", "*.json", "webpack.config.js"],
       "copyTo": "{BUILD_DIR}/bundledPlugins/game-pillarsofeternity2",
-      "os":["windows"]
+      "os":["windows", "linux"]
     },
     {
       "type": "build-copy",
@@ -268,7 +268,7 @@
       "removeModules": ["vortex-api"],
       "sources": ["src/**/*.ts", "src/**/*.tsx", "*.json", "webpack.config.js"],
       "copyTo": "{BUILD_DIR}/bundledPlugins/test-gameversion",
-      "os":["windows"]
+      "os":["windows", "linux"]
     },
     {
       "type": "build-copy",

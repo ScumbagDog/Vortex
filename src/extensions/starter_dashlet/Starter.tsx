@@ -42,6 +42,7 @@ import * as ReactDOM from 'react-dom';
 import * as Redux from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { generate as shortid } from 'shortid';
+import * as os from 'os';
 
 interface IWelcomeScreenState {
   editTool: StarterInfo;
@@ -335,7 +336,9 @@ class Starter extends ComponentEx<IStarterProps, IWelcomeScreenState> {
         program: starter.exePath,
         title: starter.name,
       }));
-    remote.app.setUserTasks(userTasks);
+      if(os.platform() === 'win32'){
+        remote.app.setUserTasks(userTasks);
+      }
   }
 
   private startGame = () => {
