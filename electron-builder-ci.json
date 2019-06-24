@@ -32,6 +32,12 @@
     "menuCategory": true,
     "uninstallDisplayName": "${productName}"
   },
+  "linux":{
+    "target": "AppImage",
+    "icon": "build",
+    "executableName": "Vortex",
+    "category": "Utility"
+  },
   "extraResources": [
     "locales"
   ],

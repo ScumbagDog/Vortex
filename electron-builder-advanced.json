@@ -43,6 +43,12 @@
     "allowToChangeInstallationDirectory": true,
     "uninstallDisplayName": "${productName}"
   },
+  "linux":{
+    "target": "dir",
+    "icon": "build",
+    "executableName": "Vortex",
+    "category": "Utility"
+  },
   "extraResources": [
     "locales"
   ],
