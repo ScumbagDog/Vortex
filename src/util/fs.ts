@@ -55,6 +55,12 @@ export interface ILinkFileOptions {
   showDialogCallback?: () => boolean;
 }
 
+export interface IRemoveFileOptions {
+  // Used to dictate whether error dialogs should
+  //  be displayed upon error repeat.
+  showDialogCallback?: () => boolean;
+}
+
 const NUM_RETRIES = 5;
 const RETRY_DELAY_MS = 100;
 const RETRY_ERRORS = new Set(['EPERM', 'EBUSY', 'EIO', 'EBADF', 'UNKNOWN']);
@@ -299,7 +305,6 @@ const moveAsync = genWrapperAsync(fs.moveAsync);
 const openAsync = genWrapperAsync(fs.openAsync);
 const readdirAsync = genWrapperAsync(fs.readdirAsync);
 const readFileAsync = genWrapperAsync(fs.readFileAsync);
-const readlinkAsync = genWrapperAsync(fs.readlinkAsync);
 const statAsync = genWrapperAsync(fs.statAsync);
 const symlinkAsync = genWrapperAsync(fs.symlinkAsync);
 const utimesAsync = genWrapperAsync(fs.utimesAsync);
@@ -316,7 +321,6 @@ export {
   mkdirsAsync,
   moveAsync,
   openAsync,
-  readlinkAsync,
   readdirAsync,
   readFileAsync,
   statAsync,
@@ -405,7 +409,7 @@ export function linkAsync(
     src: string, dest: string,
     options?: ILinkFileOptions): PromiseBB<void> {
   const stackErr = new Error();
-  return linkInt(src, dest, stackErr, NUM_RETRIES, options || undefined)
+  return linkInt(src, dest, stackErr, NUM_RETRIES, options)
     .catch(err => PromiseBB.reject(restackErr(err, stackErr)));
 }
 
@@ -417,22 +421,23 @@ function linkInt(
     .catch((err: NodeJS.ErrnoException) =>
       errorHandler(err, stackErr, tries,
                   (options !== undefined) ? options.showDialogCallback : undefined)
-        .then(() => linkInt(src, dest, stackErr, tries - 1, options || undefined)));
+        .then(() => linkInt(src, dest, stackErr, tries - 1, options)));
 }
 
 export function removeSync(dirPath: string) {
   fs.removeSync(dirPath);
 }
 
-export function unlinkAsync(filePath: string): PromiseBB<void> {
-  return unlinkInt(filePath, new Error(), NUM_RETRIES);
+export function unlinkAsync(filePath: string, options?: IRemoveFileOptions): PromiseBB<void> {
+  return unlinkInt(filePath, new Error(), NUM_RETRIES, options || {});
 }
 
-function unlinkInt(filePath: string, stackErr: Error, tries: number): PromiseBB<void> {
+function unlinkInt(filePath: string, stackErr: Error, tries: number,
+                   options: IRemoveFileOptions): PromiseBB<void> {
   return simfail(() => fs.unlinkAsync(filePath))
     .catch((err: NodeJS.ErrnoException) => {
-      const handle = () => errorHandler(err, stackErr, tries)
-          .then(() => unlinkInt(filePath, stackErr, tries - 1));
+      const handle = () => errorHandler(err, stackErr, tries, options.showDialogCallback)
+          .then(() => unlinkInt(filePath, stackErr, tries - 1, options));
 
       if (err.code === 'ENOENT') {
         // don't mind if a file we wanted deleted was already gone
@@ -498,15 +503,16 @@ function rmdirInt(dirPath: string, stackErr: Error, tries: number): PromiseBB<vo
     });
 }
 
-export function removeAsync(remPath: string): PromiseBB<void> {
+export function removeAsync(remPath: string, options?: IRemoveFileOptions): PromiseBB<void> {
   const stackErr = new Error();
-  return removeInt(remPath, stackErr, NUM_RETRIES);
+  return removeInt(remPath, stackErr, NUM_RETRIES, options || {});
 }
 
-function removeInt(remPath: string, stackErr: Error, tries: number): PromiseBB<void> {
+function removeInt(remPath: string, stackErr: Error, tries: number,
+                   options: IRemoveFileOptions): PromiseBB<void> {
   return simfail(() => rimrafAsync(remPath))
-    .catch(err => errorHandler(err, stackErr, tries)
-      .then(() => removeInt(remPath, stackErr, tries - 1)));
+    .catch(err => errorHandler(err, stackErr, tries, options.showDialogCallback)
+      .then(() => removeInt(remPath, stackErr, tries - 1, options)));
 }
 
 function rimrafAsync(remPath: string): PromiseBB<void> {
@@ -523,6 +529,32 @@ function rimrafAsync(remPath: string): PromiseBB<void> {
       }
     });
   });
+}
+
+export function readlinkAsync(linkPath: string): PromiseBB<string> {
+  const stackErr = new Error();
+  return readlinkInt(linkPath, stackErr, NUM_RETRIES);
+}
+
+function readlinkInt(linkPath: string, stackErr: Error, tries: number): PromiseBB<string> {
+  return simfail(() => fs.readlinkAsync(linkPath))
+    .catch(err => {
+      if ((err.code === 'UNKNOWN') && (process.platform === 'win32')) {
+        // on windows this return UNKNOWN if the file is not a link.
+        // of course there could be a thousand other things returning UNKNOWN but we'll never
+        // know, will we? libuv? will we?
+        const newErr: any = new Error('Not a link');
+        newErr.code = 'EINVAL';
+        newErr.syscall = 'readlink';
+        newErr.path = linkPath;
+        return Promise.reject(newErr);
+      } else if (err.code === 'EINVAL') {
+        return Promise.reject(err);
+      } else {
+        return errorHandler(err, stackErr, tries)
+          .then(() => readlinkInt(linkPath, stackErr, tries - 1));
+      }
+    });
 }
 
 function elevated(func: (ipc, req: NodeRequireFunction) => Promise<void>,

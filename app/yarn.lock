@@ -1265,8 +1265,8 @@ flux-standard-action@^2.0.0:
     lodash "^4.17.11"
 
 fomod-installer@Nexus-Mods/fomod-installer:
-  version "0.1.11"
-  resolved "https://codeload.github.com/Nexus-Mods/fomod-installer/tar.gz/fd04f8ab2d59072f56f5dae2ed30e40d78413032"
+  version "0.1.12"
+  resolved "https://codeload.github.com/Nexus-Mods/fomod-installer/tar.gz/62f2dc8f4575a9d0a3e1e70de80da3fded49d21d"
   dependencies:
     async "^2.6.2"
     copyfiles "^1.0.0"
@@ -1591,14 +1591,6 @@ i18next@^15.0.6:
   integrity sha512-7cCrVn/BcoSOGJwTilAjGgWWzUDg4scTLX1sIBMWq6QjYYBrT+ChSAvmgVyQxkHinaIcswC04XK6l15RxM4Dkg==
   dependencies:
     "@babel/runtime" "^7.3.1"
-
-icon-extract@Nexus-Mods/node-icon-extract:
-  version "1.0.2"
-  resolved "https://codeload.github.com/Nexus-Mods/node-icon-extract/tar.gz/52c6ce29ea3702f03bf2719c3ba4fa3b31cc0272"
-  dependencies:
-    autogypi "^0.2.2"
-    nan "^2.14.0"
-    node-gyp "^5.0.0"
 
 iconv-lite@0.4, iconv-lite@0.4.24, iconv-lite@^0.4.24, iconv-lite@^0.4.4, iconv-lite@~0.4.13:
   version "0.4.24"
@@ -2594,10 +2586,11 @@ performance-now@^2.1.0:
   integrity sha1-Ywn04OX6kT7BxpMHrjZLSzd8nns=
 
 permissions@Nexus-Mods/node-permissions:
-  version "1.1.11"
-  resolved "https://codeload.github.com/Nexus-Mods/node-permissions/tar.gz/e36e033c91d0a34c201e6cdb496b6e57133eb858"
+  version "1.2.0"
+  resolved "https://codeload.github.com/Nexus-Mods/node-permissions/tar.gz/4897727b0d2c3f3fd7a2768c56ab96a77086d371"
   dependencies:
     autogypi "^0.2.2"
+    nan "^2.14.0"
     nbind "^0.3.15"
     node-gyp "^5.0.0"
 
